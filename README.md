@@ -88,6 +88,14 @@ node scripts/verify-readme-test-credentials.mjs --manifest qa/.runtime/test-cred
 3. 试卷管理：试卷创建、编辑、题目关联。
 4. 在线考试：开始考试、提交答卷、自动评分。
 5. 成绩统计：个人成绩与管理端统计数据。
+6. 线下机房座位绑定：机房/场次管理、座位与电脑编号导入、学生签到机器校验、巡考扫码查看、换座登记与监考日志。
+
+## 线下机房座位绑定
+- 教务（admin/teacher）在「机房座位」中维护机房（含网段 CIDR）与考试场次，并按 `座位号,电脑编号,考生` 批量导入机位；每个座位生成唯一二维码（`SEAT-{场次ID}-{令牌}`），可打印贴于机位桌面。
+- 学生在「在线考试」页看到本人场次的机房、座位号与电脑编号，输入本机编号完成签到；签到后只能在该电脑（请求头 `X-Computer-No`）开考、取题、交卷，可选校验机房网段。换机、未签到、网段不符等行为自动写入异常记录。
+- 巡考老师在「巡考台」扫码或手输座位号，可查看学生身份、实时答题进度（已答题数、剩余时间、心跳时间）与异常记录，并可上报/处理异常。
+- 换座必须填写原因，支持迁移到空座或双方对调；换座记录写入 `exam_seat_change_logs`，并同步生成 `invigilation_logs` 监考日志，考生需在新机器重新签到。
+- 涉及数据表：`exam_rooms`、`exam_sessions`、`exam_seat_assignments`、`exam_seat_change_logs`、`exam_anomalies`、`invigilation_logs`（`exam_records` 增加 `exam_session_id/seat_no/computer_no/client_ip` 字段）。
 
 ## 角色权限
 | 角色 | 可访问模块 |
@@ -119,7 +127,7 @@ docker compose exec backend sh -lc "curl -s -X POST http://localhost:8080/api/au
 - CORS 与基础限流已配置。
 
 ## 数据库说明
-当前初始化后包含 10 张核心表（含用户、题目、试卷、考试记录、答案记录等）。
+初始化后包含 16 张核心表（含用户、题目、试卷、考试记录、答案记录，以及线下机房、场次、座位绑定、换座登记、异常记录、监考日志等）。
 
 详见：
 - `docs/Database.sql`

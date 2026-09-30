@@ -96,6 +96,7 @@ onMounted(async () => {
 
 onUnmounted(() => {
   if (timer) clearInterval(timer)
+  if (progressTimer) clearInterval(progressTimer)
 })
 
 const startTimer = () => {
@@ -158,4 +159,25 @@ const submitExam = async () => {
     submitting.value = false
   }
 }
+
+// 线下机房考试：定时上报已答题数，供巡考台查看考试进度
+const answeredTotal = () => {
+  return Object.values(answers.value).filter((v) =>
+    Array.isArray(v) ? v.length > 0 : (v !== undefined && v !== null && String(v).trim() !== '')
+  ).length
+}
+
+const sendProgress = async () => {
+  if (!examRecord.value) return
+  try {
+    await api.post('/exams/seats/progress', {
+      exam_record_id: examRecord.value.id,
+      answered_count: answeredTotal()
+    })
+  } catch (e) {
+    // 非线下场次或记录不匹配会返回 404/403，忽略即可
+  }
+}
+
+let progressTimer = setInterval(sendProgress, 15000)
 </script>

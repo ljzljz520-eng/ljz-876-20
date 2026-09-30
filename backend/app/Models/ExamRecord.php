@@ -12,6 +12,10 @@ class ExamRecord extends Model
     protected $fillable = [
         'user_id',
         'exam_paper_id',
+        'exam_session_id',
+        'seat_no',
+        'computer_no',
+        'client_ip',
         'start_time',
         'end_time',
         'score',
@@ -21,6 +25,7 @@ class ExamRecord extends Model
     protected $casts = [
         'user_id' => 'integer',
         'exam_paper_id' => 'integer',
+        'exam_session_id' => 'integer',
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'score' => 'decimal:2',
@@ -50,5 +55,15 @@ class ExamRecord extends Model
     public function answers()
     {
         return $this->hasMany(ExamRecordAnswer::class, 'exam_record_id');
+    }
+
+    public function session()
+    {
+        return $this->belongsTo(ExamSession::class, 'exam_session_id');
+    }
+
+    public function anomalies()
+    {
+        return $this->hasMany(ExamAnomaly::class, 'exam_record_id');
     }
 }

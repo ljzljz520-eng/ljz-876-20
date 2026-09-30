@@ -186,10 +186,120 @@ services:
           (3, 6, 1, 2.00),
           (3, 7, 2, 1.00);
 
+          CREATE TABLE IF NOT EXISTS exam_rooms (
+              id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              name VARCHAR(100) NOT NULL COMMENT '机房名称',
+              building VARCHAR(100) COMMENT '楼栋',
+              ip_range VARCHAR(50) COMMENT '机房网段(如192.168.10.0/24)',
+              seat_count INT DEFAULT 0 COMMENT '座位总数',
+              status TINYINT(1) DEFAULT 1 COMMENT '状态: 1-启用 0-禁用',
+              created_by BIGINT UNSIGNED COMMENT '创建人ID',
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              UNIQUE KEY uk_room_name (name),
+              INDEX idx_status (status)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='线下机房表';
+
+          CREATE TABLE IF NOT EXISTS exam_sessions (
+              id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              exam_paper_id BIGINT UNSIGNED NOT NULL COMMENT '试卷ID',
+              exam_room_id BIGINT UNSIGNED NOT NULL COMMENT '机房ID',
+              name VARCHAR(200) NOT NULL COMMENT '场次名称',
+              start_time DATETIME NOT NULL COMMENT '开考时间',
+              end_time DATETIME NOT NULL COMMENT '结束时间',
+              check_ip TINYINT(1) DEFAULT 1 COMMENT '是否校验机房IP',
+              status ENUM('scheduled', 'ongoing', 'finished', 'cancelled') DEFAULT 'scheduled' COMMENT '场次状态',
+              created_by BIGINT UNSIGNED COMMENT '创建人ID',
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              INDEX idx_exam_paper_id (exam_paper_id),
+              INDEX idx_exam_room_id (exam_room_id),
+              INDEX idx_start_time (start_time),
+              INDEX idx_status (status)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='线下考试场次表';
+
+          CREATE TABLE IF NOT EXISTS exam_seat_assignments (
+              id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              exam_session_id BIGINT UNSIGNED NOT NULL COMMENT '场次ID',
+              exam_room_id BIGINT UNSIGNED NOT NULL COMMENT '机房ID',
+              seat_no VARCHAR(20) NOT NULL COMMENT '座位号',
+              computer_no VARCHAR(50) NOT NULL COMMENT '电脑编号',
+              user_id BIGINT UNSIGNED COMMENT '分配考生ID(空座为NULL)',
+              seat_token VARCHAR(64) NOT NULL COMMENT '座位二维码令牌',
+              checkin_time TIMESTAMP NULL COMMENT '签到时间',
+              checkin_ip VARCHAR(45) NULL COMMENT '签到IP',
+              checkin_ua_hash VARCHAR(64) NULL COMMENT '签到浏览器指纹',
+              current_computer_no VARCHAR(50) NULL COMMENT '当前实际绑定电脑编号(换座后更新)',
+              last_progress_at TIMESTAMP NULL COMMENT '最近答题心跳时间',
+              answered_count INT DEFAULT 0 COMMENT '已答题数',
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              UNIQUE KEY uk_session_seat (exam_session_id, seat_no),
+              UNIQUE KEY uk_session_computer (exam_session_id, computer_no),
+              UNIQUE KEY uk_session_user (exam_session_id, user_id),
+              UNIQUE KEY uk_session_token (exam_session_id, seat_token),
+              INDEX idx_room_id (exam_room_id),
+              INDEX idx_user_id (user_id)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='场次座位/电脑绑定表';
+
+          CREATE TABLE IF NOT EXISTS exam_seat_change_logs (
+              id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              exam_session_id BIGINT UNSIGNED NOT NULL COMMENT '场次ID',
+              user_id BIGINT UNSIGNED NOT NULL COMMENT '考生ID',
+              from_seat_no VARCHAR(20) NULL COMMENT '原座位号',
+              from_computer_no VARCHAR(50) NULL COMMENT '原电脑编号',
+              to_seat_no VARCHAR(20) NOT NULL COMMENT '新座位号',
+              to_computer_no VARCHAR(50) NOT NULL COMMENT '新电脑编号',
+              reason VARCHAR(500) NOT NULL COMMENT '换座原因',
+              operator_id BIGINT UNSIGNED NOT NULL COMMENT '操作监考教师ID',
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              INDEX idx_session_id (exam_session_id),
+              INDEX idx_user_id (user_id)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='换座登记表';
+
+          CREATE TABLE IF NOT EXISTS exam_anomalies (
+              id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              exam_session_id BIGINT UNSIGNED NULL COMMENT '场次ID',
+              exam_seat_assignment_id BIGINT UNSIGNED NULL COMMENT '座位绑定ID',
+              exam_record_id BIGINT UNSIGNED NULL COMMENT '考试记录ID',
+              user_id BIGINT UNSIGNED NULL COMMENT '涉及考生ID',
+              type VARCHAR(50) NOT NULL COMMENT '异常类型',
+              detail VARCHAR(1000) NOT NULL COMMENT '异常详情',
+              severity ENUM('info', 'warning', 'critical') DEFAULT 'warning' COMMENT '严重程度',
+              resolved TINYINT(1) DEFAULT 0 COMMENT '是否已处理',
+              resolved_by BIGINT UNSIGNED NULL COMMENT '处理人ID',
+              resolved_note VARCHAR(500) NULL COMMENT '处理备注',
+              resolved_at TIMESTAMP NULL COMMENT '处理时间',
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              INDEX idx_session_id (exam_session_id),
+              INDEX idx_seat_assignment_id (exam_seat_assignment_id),
+              INDEX idx_record_id (exam_record_id),
+              INDEX idx_user_id (user_id),
+              INDEX idx_resolved (resolved)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='考试异常记录表';
+
+          CREATE TABLE IF NOT EXISTS invigilation_logs (
+              id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+              exam_session_id BIGINT UNSIGNED NOT NULL COMMENT '场次ID',
+              operator_id BIGINT UNSIGNED NOT NULL COMMENT '监考/操作教师ID',
+              action VARCHAR(50) NOT NULL COMMENT '动作类型',
+              detail VARCHAR(1000) NOT NULL COMMENT '动作详情',
+              seat_no VARCHAR(20) NULL COMMENT '相关座位号',
+              user_id BIGINT UNSIGNED NULL COMMENT '相关考生ID',
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+              INDEX idx_session_id (exam_session_id),
+              INDEX idx_operator_id (operator_id)
+          ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='监考日志表';
+
           CREATE TABLE IF NOT EXISTS exam_records (
               id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
               user_id BIGINT UNSIGNED NOT NULL COMMENT '考生ID',
               exam_paper_id BIGINT UNSIGNED NOT NULL COMMENT '试卷ID',
+              exam_session_id BIGINT UNSIGNED NULL COMMENT '线下场次ID',
+              seat_no VARCHAR(20) NULL COMMENT '实际考试座位号',
+              computer_no VARCHAR(50) NULL COMMENT '实际考试电脑编号',
+              client_ip VARCHAR(45) NULL COMMENT '开考客户端IP',
               start_time TIMESTAMP NOT NULL COMMENT '开始时间',
               end_time TIMESTAMP NULL COMMENT '提交时间',
               score DECIMAL(5,2) DEFAULT 0.00 COMMENT '得分',
@@ -198,8 +308,19 @@ services:
               updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
               INDEX idx_user_id (user_id),
               INDEX idx_exam_paper_id (exam_paper_id),
+              INDEX idx_exam_session_id (exam_session_id),
               INDEX idx_status (status)
           ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='考试记录表';
+
+          INSERT INTO exam_rooms (id, name, building, ip_range, seat_count, status, created_by) VALUES
+          (1, '第一机房', '实验楼A栋 301', '192.168.10.0/24', 2, 1, 1);
+
+          INSERT INTO exam_sessions (id, exam_paper_id, exam_room_id, name, start_time, end_time, check_ip, status, created_by) VALUES
+          (1, 1, 1, '计算机基础测试-第一场', DATE_ADD(NOW(), INTERVAL -1 HOUR), DATE_ADD(NOW(), INTERVAL 3 HOUR), 0, 'ongoing', 1);
+
+          INSERT INTO exam_seat_assignments (id, exam_session_id, exam_room_id, seat_no, computer_no, user_id, seat_token, current_computer_no) VALUES
+          (1, 1, 1, 'A01', 'PC-A01', 3, 'SEAT-1-A01-DEMO', 'PC-A01'),
+          (2, 1, 1, 'A02', 'PC-A02', NULL, 'SEAT-1-A02-DEMO', 'PC-A02');
 
           CREATE TABLE IF NOT EXISTS exam_record_answers (
               id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

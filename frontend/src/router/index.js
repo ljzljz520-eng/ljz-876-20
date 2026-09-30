@@ -55,6 +55,28 @@ const routes = [
     name: 'Statistics',
     component: () => import('../views/statistics/Index.vue'),
     meta: { requiresAuth: true, roles: ['admin', 'teacher'] }
+  },
+  {
+    path: '/invigilation/seats',
+    name: 'AdminSeats',
+    component: () => import('../views/invigilation/AdminSeats.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'teacher'] }
+  },
+  {
+    path: '/invigilation/patrol',
+    name: 'Patrol',
+    component: () => import('../views/invigilation/Patrol.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'teacher'] }
+  },
+  {
+    path: '/invigilation/logs',
+    name: 'InvigilationLogs',
+    component: () => import('../views/invigilation/Logs.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'teacher'] }
+  },
+  {
+    path: '/invigilation/scan/:token',
+    redirect: (to) => ({ name: 'Patrol', query: { token: to.params.token } })
   }
 ]
 

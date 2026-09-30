@@ -129,6 +129,47 @@
           </div>
         </router-link>
       </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <router-link to="/invigilation/seats" class="card-base card-accent-left card-accent-blue p-6 group h-full hover:bg-blue-50/10">
+          <div class="flex items-start h-full">
+            <div class="flex-shrink-0 w-14 h-14 bg-blue-100/80 rounded-2xl flex items-center justify-center mr-5 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+              <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
+              </svg>
+            </div>
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-700 transition-colors">机房座位绑定</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">为考试场次导入机房、座位号与电脑编号，绑定考生并生成机位二维码。</p>
+              </div>
+              <div class="mt-4 flex items-center text-sm font-medium text-blue-600 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                去导入 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </div>
+            </div>
+          </div>
+        </router-link>
+
+        <router-link to="/invigilation/patrol" class="card-base card-accent-left card-accent-green p-6 group h-full hover:bg-green-50/10">
+          <div class="flex items-start h-full">
+            <div class="flex-shrink-0 w-14 h-14 bg-emerald-100/80 rounded-2xl flex items-center justify-center mr-5 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+              <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z" />
+              </svg>
+            </div>
+            <div class="flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-700 transition-colors">巡考台</h3>
+                <p class="text-gray-500 text-sm leading-relaxed">扫码查看学生身份、实时答题进度与异常记录，支持登记换座并同步监考日志。</p>
+              </div>
+              <div class="mt-4 flex items-center text-sm font-medium text-emerald-600 opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                去巡考 <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+              </div>
+            </div>
+          </div>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>

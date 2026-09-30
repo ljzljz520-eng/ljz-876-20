@@ -16,6 +16,11 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
+    // 线下机房考试：签到后携带本机编号，后端据此做机位校验
+    const computerNo = localStorage.getItem('exam_computer_no')
+    if (computerNo) {
+      config.headers['X-Computer-No'] = computerNo
+    }
     return config
   },
   error => {
